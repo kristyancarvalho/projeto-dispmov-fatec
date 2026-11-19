@@ -1,95 +1,108 @@
-body {
-    background-color: pink;
+* {
+    box-sizing: border-box;
 }
 
-#titulo {
-     text-align: center;
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 24px;
+    background-color: #f6dce3;
+    font-family: Georgia, 'Times New Roman', serif;
 }
 
 #fundo {
-    border: 5px solid black;
+    min-height: calc(100vh - 48px);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 70px 32px 38px;
+    overflow: hidden;
+    border: 5px solid #5c2d20;
     border-radius: 20px;
-    width: auto;
-    height: 840px;
-    margin: auto 20px;
     background-image: url('fundo.jpeg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
 }
 
-#carrosel {
-    border: 2px solid black;
-    border-radius: 30px;
+.carrossel-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    column-gap: 30px;
+    row-gap: 72px;
+    padding: 20px;
+    background: transparent;
 }
 
-.carrossel-container {
-    border: 2px hidden;
-    border-radius: 30px;
-    margin-top: 100px;
-    display:inline-flex;
-    gap: 30px;
-    padding: 40px 40px;
-    scroll-snap-type: x mandatory; /* Efeito de "trava" ao passar as fotos */
-    scroll-behavior: smooth;
-    background-color: #f0f0f0;
-    scrollbar-width: none; /* Esconde a barra de rolagem no Firefox */
-  }
-
-  /* Esconde a barra de rolagem no Chrome/Safari */ 
-  .carrossel-container::-webkit-scrollbar {
-    display: none;
-  }
-  
-
-  /* O link que envolve a foto vira a nossa estrutura da Polaroid */
-  .polaroid-link {
+.polaroid-link {
     display: block;
+    color: #4a241a;
     text-decoration: none;
-    color: #333;
-    scroll-snap-align: center; /* Alinha a foto no centro ao scrollar */
-    flex-shrink: 0; /* Impede que as fotos amassem ou diminuam de tamanho */
-  }
-
-  /* Estilo visual da Polaroid */
-  .polaroid {
-    background: white;
-    padding: 15px 15px 30px 15px; /* Espaço maior embaixo para a legenda */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    border-radius: 2px;
-    width: 220px; /* Largura da foto */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  /* Efeito de rotação aleatória para parecerem fotos jogadas na mesa */
-  .polaroid-link:nth-child(even) .polaroid {
-    transform: rotate(3deg);
-  }
-  .polaroid-link:nth-child(odd) .polaroid {
-    transform: rotate(-3deg);
-  } 
-
-  /* Efeito de passar o mouse por cima (Hover) */
-  .polaroid-link:hover .polaroid {
-    transform: scale(1.05) rotate(0deg); /* Endireita a foto e dá um zoom */
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    z-index: 10;
-  }
-
-  /* Ajuste da imagem para preencher o espaço quadrado da Polaroid */
-  .polaroid img {
     width: 100%;
-    height: 200px; /* Mantém um corte quadrado ou retangular fixo */
-    object-fit: cover; /* Aplica o que vimos antes para preencher sem distorcer */
-    background-color: #eee;
-  }
+}
 
-  /* Legenda da foto (estilo escrita à mão) */
-  .polaroid p {
-    margin-top: 15px;
-    margin-bottom: 0;
+.polaroid {
+    width: 100%;
+    padding: 9px 9px 12px;
+    background: #fffaf2;
+    box-shadow: 0 5px 16px rgba(54, 27, 18, 0.28);
+    transition: transform 0.25s ease;
+}
+
+.polaroid-link:nth-child(even) .polaroid {
+    transform: rotate(3deg);
+}
+
+.polaroid-link:nth-child(odd) .polaroid {
+    transform: rotate(-3deg);
+}
+
+.polaroid-link:hover .polaroid {
+    transform: scale(1.06) rotate(0);
+}
+
+.polaroid img {
+    display: block;
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    border-radius: 2px;
+}
+
+.polaroid p {
+    margin: 12px 0 0;
+    color: #4a241a;
     text-align: center;
-    font-family: 'Courier New', Courier, monospace; /* Fonte estilo máquina/manual */
+    font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
     font-size: 1.1rem;
-  }
+    text-shadow: 0 1px 8px rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 12px;
+    }
+
+    #fundo {
+        min-height: calc(100vh - 24px);
+        padding: 30px 12px 24px;
+    }
+
+    .carrossel-container {
+        column-gap: 22px;
+        row-gap: 48px;
+    }
+
+    .polaroid-link {
+        grid-column: span 2;
+    }
+
+    .polaroid img {
+        height: 130px;
+    }
+}

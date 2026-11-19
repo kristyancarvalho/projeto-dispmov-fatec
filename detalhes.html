@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do doce</title>
+    <link rel="stylesheet" href="detalhes.css">
+</head>
+<body>
+    <main class="pagina-detalhes">
+        <a class="voltar" href="SiteDoces.html">&larr; Voltar para os doces</a>
+        <section class="produto">
+            <img class="produto-imagem" src="" alt="">
+            <div class="produto-conteudo">
+                <p class="etiqueta">Feito com carinho</p>
+                <h1 id="nome-doce">Doce</h1>
+                <p class="descricao">Um doce delicioso, preparado com ingredientes selecionados. Entre em contato para saber mais sobre sabores e opções disponíveis.</p>
+                <p class="preco">Preço: <strong>Sob consulta</strong></p>
+                <form id="form-encomenda">
+                    <h2>Encomendar</h2>
+                    <label for="nome-cliente">Seu nome</label>
+                    <input id="nome-cliente" name="nome" type="text" required>
+                    <label for="quantidade">Quantidade desejada</label>
+                    <input id="quantidade" name="quantidade" type="number" min="1" value="1" required>
+                    <label for="contato">Telefone ou e-mail para contato</label>
+                    <input id="contato" name="contato" type="text" required>
+                    <button type="submit">Solicitar encomenda</button>
+                    <p id="mensagem" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script>
+        const parametros = new URLSearchParams(window.location.search);
+        const nome = parametros.get('doce') || 'Doce';
+        const imagem = parametros.get('imagem');
+        document.title = `${nome} | Doces`;
+        document.querySelector('#nome-doce').textContent = nome;
+        const foto = document.querySelector('.produto-imagem');
+        if (imagem) {
+            foto.src = imagem;
+            foto.alt = nome;
+        }
+        document.querySelector('#form-encomenda').addEventListener('submit', (evento) => {
+            evento.preventDefault();
+            document.querySelector('#mensagem').textContent = 'Solicitação preenchida. Entre em contato com a doceria para confirmar sua encomenda.';
+        });
+    </script>
+</body>
+</html>
