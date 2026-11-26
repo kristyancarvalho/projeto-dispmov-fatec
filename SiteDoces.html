@@ -4,28 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doces</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Meie+Script&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="DocesEstilo.css">
 </head>
-
 <body>
- <header class="Doceria">
-            <h1 class="cabecalho">Doceria</h1>
-             <nav>
-    <ul>
-      <li><a href="login.html">Login</a></li>
-    </ul>
-  </nav>
-        </header>
 
+    <header class="topo">
+    <h1 class="titulo">Bendoces</h1>
+    <p><a class="botao" href="carrinho.html">Carrinho (<span id="contador-carrinho">0</span>)</a></p>
+</header>
+    
+    
     <main id="fundo">
-       
+
         <section class="carrossel-container" aria-label="Galeria de doces">
             <a href="detalhes.html" class="polaroid-link">
                 <div class="polaroid">
-                    <img src="https://6b00575226d24f678377e721.imgix.net/sandbox/283836-PA%C2%B3-Para-Preparo-De-Brigadeiro-Morango-45G-MAVALERIO-3.png.png?auto=format,enhance" alt="Brigadeiros de chocolate">
+                    <img src="https://images.unsplash.com/photo-1576602976047-174e57a47881?auto=format&fit=crop&w=600&q=80" alt="Brigadeiros de chocolate">
                     <p>Brigadeiros</p>
                 </div>
             </a>
@@ -37,7 +31,7 @@
             </a>
             <a href="detalhes.html" class="polaroid-link">
                 <div class="polaroid">
-                    <img src="https://6b00575226d24f678377e721.imgix.net/sandbox/intro-1670959821.webp?auto=format,enhance%3D600&q=80" alt="Donuts coloridos">
+                    <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80" alt="Donuts coloridos">
                     <p>Donuts</p>
                 </div>
             </a>
@@ -97,8 +91,65 @@
             </a>
         </section>
 
+        <section class="bloco" aria-labelledby="titulo-diferenciais">
+    <h2 id="titulo-diferenciais">Por que escolher a Bendoces</h2>
+    <div class="cards">
+        <div class="card">
+            <span class="icone" aria-hidden="true">🍫</span>
+            <h3>Ingredientes selecionados</h3>
+            <p>Chocolate de verdade, manteiga e frutas escolhidas com cuidado para cada receita.</p>
+        </div>
+        <div class="card">
+            <span class="icone" aria-hidden="true">🎂</span>
+            <h3>Feito sob encomenda</h3>
+            <p>Seus doces são preparados para a sua data, no tamanho e no sabor que você pedir.</p>
+        </div>
+        <div class="card">
+            <span class="icone" aria-hidden="true">🎉</span>
+            <h3>Para todas as ocasiões</h3>
+            <p>Aniversários, casamentos, festas de empresa ou aquele presente que não pode falhar.</p>
+        </div>
+    </div>
+</section>
+
+<section class="bloco" aria-labelledby="titulo-passos">
+    <h2 id="titulo-passos">Como encomendar</h2>
+    <div class="cards">
+        <div class="card">
+            <span class="passo-numero" aria-hidden="true">1</span>
+            <h3>Escolha o doce</h3>
+            <p>Clique em uma das fotos acima para ver a descrição.</p>
+        </div>
+        <div class="card">
+            <span class="passo-numero" aria-hidden="true">2</span>
+            <h3>Preencha o pedido</h3>
+            <p>Informe seu nome, a quantidade e um contato.</p>
+        </div>
+        <div class="card">
+            <span class="passo-numero" aria-hidden="true">3</span>
+            <h3>Guarde o código</h3>
+            <p>Você recebe um código único e envia o pedido pelo WhatsApp para confirmar.</p>
+        </div>
+    </div>
+</section>
+
+<section class="bloco contato" aria-labelledby="titulo-contato">
+    <h2 id="titulo-contato">Fale com a gente</h2>
+    <p>Atendimento de segunda a sábado, das 9h às 18h.</p>
+    <p>
+        <a class="botao" id="link-whatsapp" href="#" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+    </p>
+    <p class="instagram">Instagram: @bendoces_doces</p>
+    <p class="copyright">&copy; Bendoces. Todos os direitos reservados.</p>
+</section>
+
     </main>
     <script>
+        const CONFIG = {
+        nomeLoja: 'Bendoces',
+        whatsapp: '5511993838862'
+    };
+
         document.querySelectorAll('.polaroid-link').forEach((link) => {
             link.addEventListener('click', () => {
                 const nome = link.querySelector('p').textContent;
@@ -109,6 +160,23 @@
                 link.href = destino.href;
             });
         });
+
+        document.querySelector('#link-whatsapp').href =
+        `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent('Olá! Vim pelo site da ' + CONFIG.nomeLoja + '.')}`;
+
+        function atualizarContador() {
+    let total = 0;
+    try {
+        const carrinho = JSON.parse(localStorage.getItem('bendoces_carrinho')) || [];
+        total = carrinho.reduce((soma, item) => soma + item.qtd, 0);
+    } catch (erro) {
+        total = 0;
+    }
+    document.querySelector('#contador-carrinho').textContent = total;
+}
+
+atualizarContador();
+window.addEventListener('pageshow', atualizarContador);
     </script>
 </body>
 </html>

@@ -8,43 +8,199 @@
 </head>
 <body>
     <main class="pagina-detalhes">
+    <div class="barra-topo">
         <a class="voltar" href="SiteDoces.html">&larr; Voltar para os doces</a>
-        <section class="produto">
-            <img class="produto-imagem" src="" alt="">
-            <div class="produto-conteudo">
-                <p class="etiqueta">Feito com carinho</p>
-                <h1 id="nome-doce">Doce</h1>
-                <p class="descricao">Um doce delicioso, preparado com ingredientes selecionados. Entre em contato para saber mais sobre sabores e opções disponíveis.</p>
-                <p class="preco">Preço: <strong>Sob consulta</strong></p>
-                <form id="form-encomenda">
-                    <h2>Encomendar</h2>
-                    <label for="nome-cliente">Seu nome</label>
-                    <input id="nome-cliente" name="nome" type="text" required>
-                    <label for="quantidade">Quantidade desejada</label>
-                    <input id="quantidade" name="quantidade" type="number" min="1" value="1" required>
-                    <label for="contato">Telefone ou e-mail para contato</label>
-                    <input id="contato" name="contato" type="text" required>
-                    <button type="submit">Solicitar encomenda</button>
-                    <p id="mensagem" role="status" aria-live="polite"></p>
-                </form>
-            </div>
-        </section>
-    </main>
+        <a class="voltar" href="carrinho.html">Carrinho (<span id="contador-carrinho">0</span>)</a>
+    </div>
+    <section class="produto">
+        <img class="produto-imagem" src="" alt="">
+        <div class="produto-conteudo">
+            <p class="etiqueta">Feito com carinho</p>
+            <h1 id="nome-doce">Doce</h1>
+            <p class="descricao" id="descricao-doce"></p>
+            <form id="form-carrinho">
+                <fieldset class="opcoes" id="opcoes" hidden>
+                    <legend>Escolha uma opção</legend>
+                </fieldset>
+                <p class="preco">Preço: <strong id="preco-doce"></strong></p>
+                <label for="quantidade">Quantidade</label>
+                <input id="quantidade" name="quantidade" type="number" min="1" max="999" value="1" required>
+                <button type="submit">Adicionar ao carrinho</button>
+                <p id="mensagem" role="status" aria-live="polite"></p>
+                <a class="botao secundario" id="ir-carrinho" href="carrinho.html" hidden>Ver carrinho e finalizar</a>
+            </form>
+        </div>
+    </section>
+</main>
     <script>
-        const parametros = new URLSearchParams(window.location.search);
-        const nome = parametros.get('doce') || 'Doce';
-        const imagem = parametros.get('imagem');
-        document.title = `${nome} | Doces`;
-        document.querySelector('#nome-doce').textContent = nome;
-        const foto = document.querySelector('.produto-imagem');
-        if (imagem) {
-            foto.src = imagem;
-            foto.alt = nome;
-        }
-        document.querySelector('#form-encomenda').addEventListener('submit', (evento) => {
-            evento.preventDefault();
-            document.querySelector('#mensagem').textContent = 'Solicitação preenchida. Entre em contato com a doceria para confirmar sua encomenda.';
+const NOME_LOJA = 'Bendoces';
+
+const DOCE_PADRAO = {
+    descricao: 'Um doce delicioso, preparado com ingredientes selecionados. Entre em contato para saber mais sobre sabores e opções disponíveis.',
+    opcoes: [{ rotulo: 'Sob consulta', preco: null }]
+};
+
+
+const DOCES = {
+    'Brigadeiros': {
+        descricao: 'O clássico das festas brasileiras: chocolate cremoso, enrolado à mão e coberto com granulado. Macio por dentro e no ponto certo de doçura, é ótimo para festas e lembrancinhas.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 2 }]
+    },
+    'Cupcakes': {
+        descricao: 'Bolinhos fofos e úmidos, cobertos com cremes batidos e decorações caprichadas. Cada um é um mini bolo individual, perfeito para aniversários e mesas de festa.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 7 }]
+    },
+    'Donuts': {
+        descricao: 'Rosquinhas macias e douradas, com cobertura brilhante e granulados coloridos. Boas para o café da tarde ou para presentear alguém especial.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 10 }]
+    },
+    'Bolos': {
+        descricao: 'Bolos artesanais com massa fofinha, recheios generosos e decoração sob medida. Feitos para aniversários, casamentos e qualquer comemoração.',
+    opcoes: [{ rotulo: 'Sub Consulta', preco: null }]
+    },
+    'Cookies': {
+        descricao: 'Crocantes por fora, macios por dentro e com muitas gotas de chocolate. Assados em pequenas fornadas, ficam ainda melhores com um copo de leite gelado.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 5 }]
+    },
+    'Tortas': {
+        descricao: 'Massa amanteigada e crocante, com recheios cremosos e coberturas frescas. Uma sobremesa elegante para encerrar bem qualquer refeição.',
+    opcoes: [
+        { rotulo: 'Por Inteira', preco: 110 },
+        { rotulo: 'Por Fatia', preco: 14 }
+    ]
+    },
+    'Macarons': {
+        descricao: 'Delicados discos de amêndoas com recheio cremoso, em cores e sabores variados. Crocantes por fora e macios por dentro, são ótimos para presentear.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 5 }]
+    },
+    'Brownies': {
+        descricao: 'Densos, úmidos e com casquinha crocante, feitos com muito chocolate. Servidos com sorvete ou puros, são para quem gosta de sobremesa intensa.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 8 }]
+    },
+    'Waffles': {
+        descricao: 'Massa leve e crocante, servida com coberturas à sua escolha, como frutas, calda e chantilly. Combina com brunch, lanche e sobremesa.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 20 }]
+    },
+    'Pudim': {
+        descricao: 'Pudim de leite condensado cremoso e sem furinhos, com calda de caramelo dourada. A receita tradicional de sobremesa de domingo em família.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 50 }]
+    },
+    'Churros': {
+        descricao: 'Crocantes por fora e macios por dentro, passados em açúcar com canela e recheados com doce de leite ou chocolate. Melhores quentinhos.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 9 }]
+    },
+    'Sonhos': {
+        descricao: 'Massa leve e aerada, frita no ponto certo e recheada com creme de confeiteiro. Um doce de padaria que lembra a infância.',
+    opcoes: [{ rotulo: 'Por unidade', preco: 6 }]
+    }
+};
+
+
+// Dados do doce
+const parametros = new URLSearchParams(window.location.search);
+const nome = parametros.get('doce') || 'Doce';
+const imagem = parametros.get('imagem');
+const info = DOCES[nome] || DOCE_PADRAO;
+
+document.title = `${nome} | ${NOME_LOJA}`;
+document.querySelector('#nome-doce').textContent = nome;
+document.querySelector('#descricao-doce').textContent = info.descricao;
+
+const foto = document.querySelector('.produto-imagem');
+if (imagem) {
+    foto.src = imagem;
+    foto.alt = nome;
+}
+
+// Utilidades
+const CHAVE_CARRINHO = 'bendoces_carrinho';
+
+function moeda(valor) {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function textoPreco(opcao) {
+    return opcao.preco === null ? 'Sob consulta' : moeda(opcao.preco);
+}
+
+function lerCarrinho() {
+    try {
+        const lista = JSON.parse(localStorage.getItem(CHAVE_CARRINHO));
+        return Array.isArray(lista) ? lista : [];
+    } catch (erro) {
+        return [];
+    }
+}
+
+function salvarCarrinho(lista) {
+    try {
+        localStorage.setItem(CHAVE_CARRINHO, JSON.stringify(lista));
+        return true;
+    } catch (erro) {
+        return false;
+    }
+}
+
+function atualizarContador() {
+    const total = lerCarrinho().reduce((soma, item) => soma + item.qtd, 0);
+    document.querySelector('#contador-carrinho').textContent = total;
+}
+
+// Opções
+const fieldsetOpcoes = document.querySelector('#opcoes');
+const precoNaTela = document.querySelector('#preco-doce');
+let opcaoAtual = info.opcoes[0];
+
+function mostrarPreco() {
+    precoNaTela.textContent = textoPreco(opcaoAtual);
+}
+
+if (info.opcoes.length > 1) {
+    fieldsetOpcoes.hidden = false;
+    info.opcoes.forEach((opcao, indice) => {
+        const rotulo = document.createElement('label');
+        rotulo.className = 'opcao';
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'opcao';
+        radio.value = indice;
+        radio.checked = indice === 0;
+        radio.addEventListener('change', () => {
+            opcaoAtual = opcao;
+            mostrarPreco();
         });
+        rotulo.append(radio, `${opcao.rotulo}: ${textoPreco(opcao)}`);
+        fieldsetOpcoes.append(rotulo);
+    });
+}
+
+mostrarPreco();
+atualizarContador();
+
+// Adicionar ao carrinho
+document.querySelector('#form-carrinho').addEventListener('submit', (evento) => {
+    evento.preventDefault();
+
+    const qtd = Math.min(999, Math.max(1, Math.floor(Number(document.querySelector('#quantidade').value)) || 1));
+    const chave = `${nome}|${opcaoAtual.rotulo}`;
+    const carrinho = lerCarrinho();
+    const existente = carrinho.find((item) => item.chave === chave);
+
+    if (existente) {
+        existente.qtd = Math.min(999, existente.qtd + qtd);
+    } else {
+        carrinho.push({ chave, doce: nome, opcao: opcaoAtual.rotulo, preco: opcaoAtual.preco, qtd });
+    }
+
+    const mensagem = document.querySelector('#mensagem');
+    if (salvarCarrinho(carrinho)) {
+        mensagem.textContent = `${qtd}x ${nome} (${opcaoAtual.rotulo}) adicionado ao carrinho.`;
+        document.querySelector('#ir-carrinho').hidden = false;
+        atualizarContador();
+    } else {
+        mensagem.textContent = 'Não foi possível salvar o carrinho neste navegador.';
+    }
+});
     </script>
 </body>
 </html>

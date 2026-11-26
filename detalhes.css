@@ -2,6 +2,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -19,9 +23,17 @@ body {
 .voltar {
     display: inline-block;
     margin-bottom: 20px;
-    color: #fffbd6ee;
+    padding: 11px 20px;
+    color: #fffaf2;
+    background: #713c2b;
+    border-radius: 7px;
+    box-shadow: 0 4px 12px rgba(54, 27, 18, 0.25);
     font-weight: bold;
     text-decoration: none;
+}
+
+.voltar:hover {
+    background: #54271d;
 }
 
 .produto {
@@ -74,7 +86,8 @@ form {
     gap: 10px;
 }
 
-form h2 {
+form h2,
+#confirmacao h2 {
     margin: 8px 0;
 }
 
@@ -90,7 +103,9 @@ input {
     font: inherit;
 }
 
-button {
+button,
+.botao {
+    display: inline-block;
     margin-top: 8px;
     padding: 13px 16px;
     border: 0;
@@ -98,21 +113,197 @@ button {
     color: #fffaf2;
     background: #713c2b;
     font: bold 1rem Georgia, 'Times New Roman', serif;
+    text-align: center;
+    text-decoration: none;
     cursor: pointer;
 }
 
-button:hover {
+button:hover,
+.botao:hover {
     background: #54271d;
 }
 
-#mensagem {
-    margin: 0;
+button.secundario,
+.botao.secundario {
+    color: #713c2b;
+    background: transparent;
+    border: 2px solid #713c2b;
+}
+
+button.secundario:hover,
+.botao.secundario:hover {
+    color: #fffaf2;
+    background: #713c2b;
+}
+
+#confirmacao p {
+    margin: 0 0 10px;
     line-height: 1.5;
+}
+
+.codigo {
+    padding: 14px 12px;
+    color: #4a241a;
+    background: #fff;
+    border: 2px dashed #713c2b;
+    border-radius: 10px;
+    font: bold clamp(1.4rem, 4vw, 1.9rem) 'Courier New', Courier, monospace;
+    letter-spacing: 0.08em;
+    text-align: center;
+    user-select: all;
+}
+
+.acoes {
+    display: grid;
+    gap: 8px;
+    margin: 14px 0;
+}
+
+.aviso {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.barra-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.barra-topo .voltar {
+    margin-bottom: 0;
+}
+
+/* Opções do doce (ex.: torta inteira ou fatia) */
+.opcoes {
+    display: grid;
+    gap: 8px;
+    margin: 18px 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.opcoes legend {
+    margin-bottom: 8px;
+    padding: 0;
+    font-weight: bold;
+}
+
+.opcao {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #c7a89a;
+    border-radius: 7px;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.opcao input {
+    width: auto;
+    margin: 0;
+    padding: 0;
+}
+
+.opcao:has(input:checked) {
+    background: #fff;
+    border-color: #713c2b;
+}
+
+/* Página do carrinho */
+.painel {
+    padding: 28px;
+    border: 1px solid rgba(92, 45, 32, 0.18);
+    border-radius: 16px;
+    background: rgba(255, 250, 242, 0.95);
+    box-shadow: 0 12px 35px rgba(54, 27, 18, 0.2);
+}
+
+.painel h1 {
+    margin-top: 0;
+}
+
+.lista-itens {
+    display: grid;
+    gap: 14px;
+    margin: 0 0 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.item-carrinho {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 14px;
+    border: 1px solid #c7a89a;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.item-info strong {
+    display: block;
+    font-size: 1.1rem;
+}
+
+.item-info span {
+    opacity: 0.8;
+}
+
+.item-total {
+    font-weight: bold;
+    text-align: right;
+}
+
+.item-controles {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.item-carrinho button {
+    margin-top: 0;
+    padding: 8px 14px;
+}
+
+.item-carrinho > button {
+    justify-self: end;
+}
+
+.item-qtd {
+    min-width: 2ch;
+    font-weight: bold;
+    text-align: center;
+}
+
+.resumo {
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.resumo p {
+    margin: 0 0 6px;
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 @media (max-width: 700px) {
     body {
         padding: 18px 12px;
+    }
+
+    .painel {
+        padding: 18px;
     }
 
     .produto {

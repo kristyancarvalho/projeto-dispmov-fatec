@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho | Bendoces</title>
+    <link rel="stylesheet" href="detalhes.css">
+</head>
+<body>
+    <main class="pagina-detalhes">
+        <div class="barra-topo">
+            <a class="voltar" href="SiteDoces.html">&larr; Voltar para os doces</a>
+        </div>
+
+        <section class="painel">
+            <h1>Seu carrinho</h1>
+
+            <p id="carrinho-vazio" hidden>Seu carrinho está vazio. <a href="SiteDoces.html">Escolha seus doces</a>.</p>
+
+            <div id="conteudo-carrinho" hidden>
+                <ul class="lista-itens" id="lista-itens"></ul>
+
+                <div class="resumo">
+                    <p>Total de itens: <strong id="total-itens">0</strong></p>
+                    <p>Total: <strong id="total-valor">R$ 0,00</strong></p>
+                    <p class="aviso" id="nota-consulta" hidden>Itens sob consulta não entram no total. A doceria informa o valor na confirmação.</p>
+                </div>
+
+                <form id="form-pedido">
+                    <h2>Finalizar pedido</h2>
+                    <label for="nome-cliente">Seu nome</label>
+                    <input id="nome-cliente" name="nome" type="text" required>
+                    <label for="contato">Telefone ou e-mail para contato</label>
+                    <input id="contato" name="contato" type="text" required>
+                    <button type="submit">Finalizar pedido</button>
+                </form>
+            </div>
+
+            <div id="confirmacao" hidden>
+                <h2>Pedido registrado!</h2>
+                <p>Guarde o código da sua encomenda:</p>
+                <p class="codigo" id="codigo-pedido"></p>
+                <p id="mensagem" role="status" aria-live="polite"></p>
+                <div class="acoes">
+                    <a class="botao" id="link-whatsapp" href="#" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>
+                    <button type="button" id="copiar">Copiar código</button>
+                    <a class="botao secundario" href="SiteDoces.html">&larr; Voltar para os doces</a>
+                </div>
+                <p class="aviso">O pedido só é confirmado depois que você enviar a mensagem pelo WhatsApp e a doceria responder.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const CONFIG = {
+            nomeLoja: 'Bendoces',
+            whatsapp: '5511993838862',
+            prefixoCodigo: 'BEN'
+        };
+
+        const CHAVE_CARRINHO = 'bendoces_carrinho';
+        const CHAVE_PEDIDOS = 'bendoces_pedidos';
+        // Alfabeto sem 0/O e 1/I/L, para evitar confusão ao ler ou digitar.
+        const ALFABETO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+        // Utilidades
+        function moeda(valor) {
+            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function lerLista(chave) {
+            try {
+                const lista = JSON.parse(localStorage.getItem(chave));
+                return Array.isArray(lista) ? lista : [];
+            } catch (erro) {
+                return [];
+            }
+        }
+
+        function salvarLista(chave, lista) {
+            try {
+                localStorage.setItem(chave, JSON.stringify(lista));
+                return true;
+            } catch (erro) {
+                return false;
+            }
+        }
+
+        function criar(tag, classe, texto) {
+            const elemento = document.createElement(tag);
+            if (classe) elemento.className = classe;
+            if (texto !== undefined) elemento.textContent = texto;
+            return elemento;
+        }
+
+        function textoPrecoItem(item) {
+            return item.preco === null ? 'Sob consulta' : moeda(item.preco);
+        }
+
+        function totais(carrinho) {
+            let itens = 0;
+            let valor = 0;
+            let temConsulta = false;
+            carrinho.forEach((item) => {
+                itens += item.qtd;
+                if (item.preco === null) {
+                    temConsulta = true;
+                } else {
+                    valor += item.preco * item.qtd;
+                }
+            });
+            return { itens, valor, temConsulta };
+        }
+
+        function textoTotal(t) {
+            if (t.valor === 0 && t.temConsulta) return 'Sob consulta';
+            return moeda(t.valor) + (t.temConsulta ? ' (mais itens sob consulta)' : '');
+        }
+
+        // Carrinho na tela
+        function desenharCarrinho() {
+            const carrinho = lerLista(CHAVE_CARRINHO);
+            const vazio = carrinho.length === 0;
+            document.querySelector('#carrinho-vazio').hidden = !vazio;
+            document.querySelector('#conteudo-carrinho').hidden = vazio;
+
+            const lista = document.querySelector('#lista-itens');
+            lista.replaceChildren();
+
+            carrinho.forEach((item) => {
+                const li = criar('li', 'item-carrinho');
+
+                const info = criar('div', 'item-info');
+                info.append(
+                    criar('strong', '', item.doce),
+                    criar('span', '', `${item.opcao}: ${textoPrecoItem(item)}`)
+                );
+
+                const totalItem = criar('div', 'item-total',
+                    item.preco === null ? 'Sob consulta' : moeda(item.preco * item.qtd));
+
+                const controles = criar('div', 'item-controles');
+
+                const menos = criar('button', 'secundario', '−');
+                menos.type = 'button';
+                menos.disabled = item.qtd <= 1;
+                menos.dataset.chave = item.chave;
+                menos.dataset.acao = 'menos';
+                menos.setAttribute('aria-label', `Diminuir a quantidade de ${item.doce}`);
+                menos.addEventListener('click', () => alterarQuantidade(item.chave, -1));
+
+                const qtd = criar('span', 'item-qtd', String(item.qtd));
+
+                const mais = criar('button', 'secundario', '+');
+                mais.type = 'button';
+                mais.disabled = item.qtd >= 999;
+                mais.dataset.chave = item.chave;
+                mais.dataset.acao = 'mais';
+                mais.setAttribute('aria-label', `Aumentar a quantidade de ${item.doce}`);
+                mais.addEventListener('click', () => alterarQuantidade(item.chave, 1));
+
+                controles.append(menos, qtd, mais);
+
+                const remover = criar('button', 'secundario', 'Remover');
+                remover.type = 'button';
+                remover.setAttribute('aria-label', `Remover ${item.doce} do carrinho`);
+                remover.addEventListener('click', () => removerItem(item.chave));
+
+                li.append(info, totalItem, controles, remover);
+                lista.append(li);
+            });
+
+            const t = totais(carrinho);
+            document.querySelector('#total-itens').textContent = t.itens;
+            document.querySelector('#total-valor').textContent =
+                (t.valor === 0 && t.temConsulta) ? 'Sob consulta' : moeda(t.valor);
+            document.querySelector('#nota-consulta').hidden = !t.temConsulta;
+        }
+
+        function alterarQuantidade(chave, delta) {
+            const carrinho = lerLista(CHAVE_CARRINHO);
+            const item = carrinho.find((i) => i.chave === chave);
+            if (!item) return;
+            item.qtd = Math.min(999, Math.max(1, item.qtd + delta));
+            salvarLista(CHAVE_CARRINHO, carrinho);
+            desenharCarrinho();
+
+            // devolve o foco ao botão clicado, para poder clicar várias vezes seguidas
+            const acao = delta > 0 ? 'mais' : 'menos';
+            const botoes = document.querySelectorAll(`#lista-itens button[data-acao="${acao}"]`);
+            const botao = Array.from(botoes).find((b) => b.dataset.chave === chave);
+            if (botao && !botao.disabled) botao.focus();
+        }
+
+        function removerItem(chave) {
+            const carrinho = lerLista(CHAVE_CARRINHO).filter((i) => i.chave !== chave);
+            salvarLista(CHAVE_CARRINHO, carrinho);
+            desenharCarrinho();
+        }
+
+        // Código de pedido
+        // Formato: BEN-AAMMDD-XXXX (ex.: BEN-261126-K7F2)
+        function dataCurta() {
+            const agora = new Date();
+            const aa = String(agora.getFullYear()).slice(-2);
+            const mm = String(agora.getMonth() + 1).padStart(2, '0');
+            const dd = String(agora.getDate()).padStart(2, '0');
+            return aa + mm + dd;
+        }
+
+        function sufixoAleatorio(tamanho) {
+            const bytes = new Uint8Array(tamanho);
+            crypto.getRandomValues(bytes);
+            return Array.from(bytes, (b) => ALFABETO[b % ALFABETO.length]).join('');
+        }
+
+        function gerarCodigoUnico(pedidosExistentes) {
+            const usados = new Set(pedidosExistentes.map((p) => p.codigo));
+            let codigo;
+            do {
+                codigo = `${CONFIG.prefixoCodigo}-${dataCurta()}-${sufixoAleatorio(4)}`;
+            } while (usados.has(codigo));
+            return codigo;
+        }
+
+        // Finalizar pedido
+        const formulario = document.querySelector('#form-pedido');
+
+        formulario.addEventListener('submit', (evento) => {
+            evento.preventDefault();
+
+            const carrinho = lerLista(CHAVE_CARRINHO);
+            if (carrinho.length === 0) return;
+
+            const pedidos = lerLista(CHAVE_PEDIDOS);
+            const t = totais(carrinho);
+            const pedido = {
+                codigo: gerarCodigoUnico(pedidos),
+                cliente: formulario.nome.value.trim(),
+                contato: formulario.contato.value.trim(),
+                itens: carrinho,
+                totalItens: t.itens,
+                total: t.valor,
+                temConsulta: t.temConsulta,
+                data: new Date().toISOString()
+            };
+
+            pedidos.push(pedido);
+            const salvou = salvarLista(CHAVE_PEDIDOS, pedidos);
+            salvarLista(CHAVE_CARRINHO, []);
+
+            document.querySelector('#codigo-pedido').textContent = pedido.codigo;
+            document.querySelector('#mensagem').textContent = salvou
+                ? 'Pedido salvo neste navegador. Envie-o à doceria para confirmar.'
+                : 'Não foi possível salvar o pedido neste navegador. Anote o código e envie-o à doceria.';
+
+            const linhasItens = pedido.itens.map((i) =>
+                `- ${i.qtd}x ${i.doce} (${i.opcao}): ${i.preco === null ? 'sob consulta' : moeda(i.preco * i.qtd)}`);
+            const texto = [
+                `Olá! Quero fazer uma encomenda na ${CONFIG.nomeLoja}.`,
+                `Código do pedido: ${pedido.codigo}`,
+                `Nome: ${pedido.cliente}`,
+                `Contato: ${pedido.contato}`,
+                '',
+                'Itens:',
+                ...linhasItens,
+                '',
+                `Total de itens: ${t.itens}`,
+                `Total: ${textoTotal(t)}`
+            ].join('\n');
+            document.querySelector('#link-whatsapp').href =
+                `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`;
+
+            document.querySelector('#conteudo-carrinho').hidden = true;
+            document.querySelector('#confirmacao').hidden = false;
+            document.querySelector('#confirmacao').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        document.querySelector('#copiar').addEventListener('click', async (evento) => {
+            const botao = evento.currentTarget;
+            const codigo = document.querySelector('#codigo-pedido').textContent;
+            try {
+                await navigator.clipboard.writeText(codigo);
+                botao.textContent = 'Código copiado!';
+            } catch (erro) {
+                botao.textContent = 'Selecione e copie o código acima';
+            }
+            setTimeout(() => { botao.textContent = 'Copiar código'; }, 2500);
+        });
+
+        desenharCarrinho();
+    </script>
+</body>
+</html>
